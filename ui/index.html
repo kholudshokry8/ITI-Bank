@@ -90,7 +90,7 @@
       docs: [], question: '', answer: null, apps: [], assessmentId: '', result: null, comment: '', message: '', isError: false }),
     methods: {
       async api(method, url, body) {
-        const res = await fetch(url, { method, headers: { 'content-type': 'application/json', ...(this.token ? { authorization: 'Bearer ' + this.token } : {}) }, body: body ? JSON.stringify(body) : undefined });
+        const res = await fetch(url, { method, headers: { ...(body ? { 'content-type': 'application/json' } : {}), ...(this.token ? { authorization: 'Bearer ' + this.token } : {}) }, body: body ? JSON.stringify(body) : undefined });
         const data = await res.json();
         if (!res.ok) { this.isError = true; this.message = (data.error && data.error.code + ': ' + data.error.message) || 'Request failed'; throw new Error(this.message); }
         this.isError = false; this.message = '';

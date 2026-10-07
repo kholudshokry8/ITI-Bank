@@ -1,0 +1,9 @@
+Source document name: {{source_document}}
+
+<salary_certificate>
+{{salary_certificate}}
+</salary_certificate>
+
+<bureau_summary>
+{{bureau_summary}}
+</bureau_summary>

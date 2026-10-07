@@ -1,0 +1,6 @@
+Application: {{application_id}}
+Policy edition applied: {{edition}}
+Recommendation: {{recommendation}}
+
+Rule results:
+{{rules}}

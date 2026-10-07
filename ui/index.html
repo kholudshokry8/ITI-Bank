@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CreditCopilot Lite</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 1rem auto; max-width: 960px; padding: 0 1rem; }
+  nav button { margin-right: .4rem; }
+  section { border: 1px solid #ccc; padding: .8rem; margin-top: .8rem; }
+  pre { background: #f5f5f5; padding: .6rem; overflow: auto; white-space: pre-wrap; }
+  .err { color: #b00020; } .ok { color: #1b5e20; }
+  table { border-collapse: collapse; } td, th { border: 1px solid #ccc; padding: .2rem .5rem; text-align: left; }
+  input[type=text], input[type=password], textarea { width: 100%; box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>CreditCopilot Lite <small>(synthetic training data)</small></h1>
+
+  <section v-if="!token">
+    <h2>Login</h2>
+    <p>Demo: loan.officer / Demo-Loan-1 · credit.officer / Demo-Credit-1 · senior.officer / Demo-Senior-1</p>
+    <input type="text" v-model="username" placeholder="username" />
+    <input type="password" v-model="password" placeholder="password" @keyup.enter="login" />
+    <button @click="login">Login</button>
+  </section>
+
+  <template v-else>
+    <p>Signed in as <b>{{ username }}</b> ({{ role }}) <button @click="logout">Logout</button></p>
+    <nav>
+      <button v-for="t in tabs" :key="t" @click="tab = t">{{ t }}</button>
+    </nav>
+
+    <section v-if="tab === 'Ingest'">
+      <button @click="ingest">Ingest policy documents</button> <button @click="status">Status</button>
+      <table v-if="docs.length"><tr><th>File</th><th>Status</th><th>Chunks</th><th>Error</th></tr>
+        <tr v-for="d in docs" :key="d.file"><td>{{ d.file }}</td><td>{{ d.status }}</td><td>{{ d.chunks }}</td><td>{{ d.error }}</td></tr>
+      </table>
+    </section>
+
+    <section v-if="tab === 'Ask'">
+      <textarea v-model="question" rows="2" placeholder="Ask about the credit policy"></textarea>
+      <button @click="ask">Ask</button>
+      <div v-if="answer">
+        <pre>{{ answer.answer }}</pre>
+        <p v-if="answer.reason" class="err">Refused: {{ answer.reason }}</p>
+        <ul><li v-for="c in answer.citations" :key="c.chunk_id">{{ c.chunk_id }} — {{ c.source_file }} p.{{ c.page }} (score {{ c.score }})</li></ul>
+      </div>
+    </section>
+
+    <section v-if="tab === 'Assess'">
+      <button @click="loadApps">Load applications</button>
+      <ul><li v-for="a in apps" :key="a.id">{{ a.id }} <button @click="assess(a.id)">Assess</button></li></ul>
+    </section>
+
+    <section v-if="tab === 'Review'">
+      <p>Assessment id: <input type="text" v-model="assessmentId" /> <button @click="loadAssessment()">Open</button></p>
+      <div v-if="result">
+        <h3>{{ result.application_id }} — {{ result.recommendation }}
+          <small>(edition {{ result.policy_edition }}, status {{ result.status }}, needs {{ result.approval_required_from }})</small></h3>
+        <p v-if="result.refer_reasons && result.refer_reasons.length" class="err">Refer: {{ result.refer_reasons.join(' | ') }}</p>
+        <table v-if="result.calculation">
+          <tr><th>Rate %</th><th>Instalment</th><th>DBR</th><th>Max DBR</th><th>Max eligible</th><th>Recommended</th></tr>
+          <tr><td>{{ result.calculation.annual_rate_percent }}</td><td>{{ result.calculation.monthly_instalment }}</td>
+            <td>{{ result.calculation.debt_burden_display }}</td><td>{{ result.calculation.max_dbr * 100 }}%</td>
+            <td>{{ result.calculation.maximum_eligible_amount }}</td><td>{{ result.recommended_amount }}</td></tr>
+        </table>
+        <table><tr><th>Rule</th><th>Clause</th><th>Result</th><th>Citation</th><th>Detail</th></tr>
+          <tr v-for="r in result.rule_results" :key="r.clause"><td>{{ r.rule }}</td><td>{{ r.clause }}</td><td>{{ r.result }}</td><td>{{ r.citation }}</td><td>{{ r.detail }}</td></tr>
+        </table>
+        <pre>{{ result.memo }}</pre>
+        <p>Removed before assessment: {{ (result.protected_attributes_removed || []).join(', ') }}</p>
+        <input type="text" v-model="comment" placeholder="comment (required)" />
+        <button @click="decide('approve')">Approve</button> <button @click="decide('reject')">Reject</button> <button @click="decide('issue')">Issue</button>
+        <details><summary>Run log</summary><pre>{{ JSON.stringify(result.log, null, 2) }}</pre></details>
+        <ul><li v-for="d in result.decisions || []" :key="d.decided_at + d.action">{{ d.action }} by {{ d.role }} — {{ d.comment }}</li></ul>
+      </div>
+    </section>
+
+    <p v-if="message" :class="isError ? 'err' : 'ok'">{{ message }}</p>
+  </template>
+</div>
+<script src="/vendor/vue.js"></script>
+<script>
+  // All text is rendered with Vue interpolation (escaped); LLM output is never inserted as HTML.
+  const { createApp } = Vue;
+  createApp({
+    data: () => ({ token: '', username: '', password: '', role: '', tab: 'Ask', tabs: ['Ingest', 'Ask', 'Assess', 'Review'],
+      docs: [], question: '', answer: null, apps: [], assessmentId: '', result: null, comment: '', message: '', isError: false }),
+    methods: {
+      async api(method, url, body) {
+        const res = await fetch(url, { method, headers: { 'content-type': 'application/json', ...(this.token ? { authorization: 'Bearer ' + this.token } : {}) }, body: body ? JSON.stringify(body) : undefined });
+        const data = await res.json();
+        if (!res.ok) { this.isError = true; this.message = (data.error && data.error.code + ': ' + data.error.message) || 'Request failed'; throw new Error(this.message); }
+        this.isError = false; this.message = '';
+        return data;
+      },
+      async login() { const d = await this.api('POST', '/auth/login', { username: this.username, password: this.password }); this.token = d.token; this.role = d.role; this.password = ''; },
+      logout() { this.token = ''; this.result = null; },
+      async ingest() { const d = await this.api('POST', '/ingest'); this.docs = d.documents; this.message = 'Total chunks: ' + d.total_chunks; },
+      async status() { this.docs = (await this.api('GET', '/ingest/status')).documents; },
+      async ask() { this.answer = await this.api('POST', '/ask', { question: this.question }); },
+      async loadApps() { this.apps = (await this.api('GET', '/applications')).applications; },
+      async assess(id) { const d = await this.api('POST', '/applications/' + id + '/assess'); this.assessmentId = d.assessment_id; this.tab = 'Review'; await this.loadAssessment(); },
+      async loadAssessment() { this.result = await this.api('GET', '/assessments/' + this.assessmentId); },
+      async decide(action) { const d = await this.api('POST', '/assessments/' + this.assessmentId + '/' + action, { comment: this.comment || 'n/a' }); this.message = action + ' -> ' + d.status; this.isError = false; await this.loadAssessment(); },
+    },
+  }).mount('#app');
+</script>
+</body>
+</html>

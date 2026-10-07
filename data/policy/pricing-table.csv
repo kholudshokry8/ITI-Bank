@@ -1,0 +1,7 @@
+document_id,version,effective_from,tenor_from_months,tenor_to_months,segment,annual_rate_percent
+PT-2025-01,1.0,2024-01-01,12,36,standard,22.00
+PT-2025-01,1.0,2024-01-01,37,60,standard,24.00
+PT-2025-01,1.0,2024-01-01,61,72,standard,26.00
+PT-2025-01,1.0,2024-01-01,12,36,payroll_transfer,20.00
+PT-2025-01,1.0,2024-01-01,37,60,payroll_transfer,22.00
+PT-2025-01,1.0,2024-01-01,61,72,payroll_transfer,24.00

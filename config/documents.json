@@ -1,0 +1,74 @@
+{
+  "documents": [
+    {
+      "file": "credit-policy-2024.pdf",
+      "docId": "CP-2024",
+      "docType": "policy",
+      "edition": "CP-2024",
+      "effectiveFrom": "2024-01-01",
+      "effectiveTo": "2025-03-01",
+      "status": "superseded",
+      "noSplit": ["CP-13"]
+    },
+    {
+      "file": "credit-policy-2025.pdf",
+      "docId": "CP-2025",
+      "docType": "policy",
+      "edition": "CP-2025",
+      "effectiveFrom": "2025-03-01",
+      "effectiveTo": null,
+      "status": "in_force",
+      "noSplit": ["CP-13"]
+    },
+    {
+      "file": "credit-procedures-manual.pdf",
+      "docId": "PM-CC-2025",
+      "docType": "manual",
+      "edition": null,
+      "effectiveFrom": "2025-03-01",
+      "effectiveTo": null,
+      "status": "in_force",
+      "noSplit": []
+    },
+    {
+      "file": "product-sheet-personal-loan.md",
+      "docId": "PS-PL-100",
+      "docType": "product",
+      "edition": null,
+      "effectiveFrom": "2024-01-01",
+      "effectiveTo": null,
+      "status": "in_force",
+      "noSplit": []
+    },
+    {
+      "file": "pricing-table.csv",
+      "docId": "PT-2025-01",
+      "docType": "pricing",
+      "edition": null,
+      "effectiveFrom": "2024-01-01",
+      "effectiveTo": null,
+      "status": "in_force",
+      "noSplit": []
+    },
+    {
+      "file": "circular-2024-07.md",
+      "docId": "CIRC-2024-07",
+      "docType": "circular",
+      "edition": null,
+      "effectiveFrom": "2024-08-01",
+      "effectiveTo": "2025-03-01",
+      "status": "superseded",
+      "noSplit": []
+    },
+    {
+      "file": "circular-2025-02.md",
+      "docId": "CIRC-2025-02",
+      "docType": "circular",
+      "edition": null,
+      "effectiveFrom": "2025-03-01",
+      "effectiveTo": null,
+      "status": "in_force",
+      "noSplit": []
+    }
+  ]
+}

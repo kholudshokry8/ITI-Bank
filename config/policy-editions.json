@@ -1,0 +1,41 @@
+{
+  "editions": [
+    {
+      "id": "CP-2024",
+      "effectiveFrom": "2024-01-01",
+      "effectiveTo": "2025-03-01",
+      "maxDbr": 0.5,
+      "minNetIncome": 8000,
+      "minAge": 21,
+      "maxAgeAtMaturity": 60,
+      "minEmploymentMonths": 6,
+      "minBureauScore": 600,
+      "circularMaxTenor": 60
+    },
+    {
+      "id": "CP-2025",
+      "effectiveFrom": "2025-03-01",
+      "effectiveTo": null,
+      "maxDbr": 0.45,
+      "minNetIncome": 10000,
+      "minAge": 21,
+      "maxAgeAtMaturity": 60,
+      "minEmploymentMonths": 6,
+      "minBureauScore": 600,
+      "circularMaxTenor": 72
+    }
+  ],
+  "product": {
+    "minAmount": 20000,
+    "maxAmount": 1000000,
+    "minTenor": 12,
+    "maxTenor": 60
+  },
+  "certificateMaxAgeDays": 60,
+  "authorityLimits": {
+    "loan_officer": 0,
+    "credit_officer": 250000,
+    "senior_credit_officer": 500000,
+    "head_of_consumer_credit": 1000000
+  }
+}
